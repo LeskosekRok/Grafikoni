@@ -1,0 +1,13 @@
+# Visual Studio
+.vs/
+*.user
+*.suo
+
+# Quarto output
+output/
+*.docx
+*.png
+
+# Python cache
+__pycache__/
+*.pyc

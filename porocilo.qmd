@@ -1,0 +1,68 @@
+---
+title: "Grafikon Centili"
+author: "Rok"
+format: docx
+---
+
+```{python}
+#| echo: false
+import os
+import pandas as pd
+import matplotlib.pyplot as plt
+import numpy as np
+
+# --- Ustvari mapo output, če ne obstaja ---
+os.makedirs("output", exist_ok=True)
+
+# --- Preberi Excel ---
+df = pd.read_excel(
+    "Grafikoni.xlsx", 
+    sheet_name="grafCentili", 
+    usecols="P:S", 
+    skiprows=2, 
+    nrows=14
+)
+
+# Odstrani prazne vrednosti v stolpcu Test
+df = df.dropna(subset=["Test"])
+
+y_cols = ["ZmigajSdV", "Regija", "Država"]
+
+# --- Centriranje na 50, na y-osi pokažemo dejanske vrednosti ---
+df_centered = df.copy()
+for col in y_cols:
+    df_centered[col + "_delta"] = df_centered[col] - 50  # Stolpci nad/pod 50
+
+x = df_centered["Test"]
+colors = ["#1f77b4", "#ff7f0e", "#2ca02c"]
+width = 0.2
+x_pos = np.arange(len(x))
+
+# --- Risanje stolpičnega grafikona ---
+fig, ax = plt.subplots(figsize=(10,6))
+
+for i, col in enumerate(y_cols):
+    ax.bar(
+        x_pos + i*width, 
+        df_centered[col + "_delta"], 
+        width, 
+        label=col, 
+        color=colors[i]
+    )
+
+# Y-osi prilagodimo, da kaže dejanske vrednosti (0–100)
+y_ticks = np.arange(0, 101, 10)
+ax.set_yticks(y_ticks - 50)  # ker je 50 v sredini
+ax.set_yticklabels([str(t) for t in y_ticks])
+
+# Nastavitve osi in legende
+ax.set_xticks(x_pos + width)
+ax.set_xticklabels(x, rotation=45)
+ax.set_ylabel("Povprečni centil")
+ax.axhline(0, color='black', linewidth=0.8)  # 50 kot srednja črta
+ax.legend()
+
+plt.tight_layout()
+plt.savefig("output/grafikon.png")
+plt.show()
+```
